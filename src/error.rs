@@ -6,6 +6,8 @@ pub enum Error {
     UnsupportedHeaderVersion,
     UnsupportedHeaderFlags,
     CorruptedStreamHeader,
+    UnsupportedBlockFlags,
+    CorruptedBlockHeader,
     Io(std::io::Error),
 }
 

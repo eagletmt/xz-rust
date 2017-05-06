@@ -1,6 +1,8 @@
 extern crate crc;
 extern crate std;
 
+use std::io::Read;
+
 pub struct XzDecoder<R> {
     inner: std::io::BufReader<R>,
     stream_header: super::StreamHeader,
@@ -15,6 +17,36 @@ impl<R> XzDecoder<R>
         Ok(Self {
                inner: reader,
                stream_header: stream_header,
+           })
+    }
+
+    pub fn read_block_header(&mut self) -> Result<super::BlockHeader, super::Error> {
+        // Specification: v1.0.4 3.1.1
+        let mut encoded_header_size = [0; 1];
+        self.inner.read_exact(&mut encoded_header_size)?;
+        if encoded_header_size[0] == 0 {
+            panic!("TODO: This is index");
+        }
+        let block_header_size = ((encoded_header_size[0] as u16) + 1) * 4;
+        let mut buf = vec![0; block_header_size as usize - 5]; // 1 byte for encoded_header_size, 4 bytes for crc32
+        self.inner.read_exact(&mut buf)?;
+        let crc32 = read_u32le(&mut self.inner)?;
+
+        {
+            use self::crc::Hasher32;
+            let mut digest = crc::crc32::Digest::new(crc::crc32::IEEE);
+            digest.write(&encoded_header_size);
+            digest.write(&buf);
+            if crc32 != digest.sum32() {
+                return Err(super::Error::CorruptedBlockHeader);
+            }
+        }
+
+        let block_flags = super::BlockFlags::new(buf[0])?;
+
+        Ok(super::BlockHeader {
+               block_header_size,
+               block_flags,
            })
     }
 }
