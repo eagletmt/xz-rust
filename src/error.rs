@@ -5,6 +5,7 @@ pub enum Error {
     InvalidHeaderMagic,
     UnsupportedHeaderVersion,
     UnsupportedHeaderFlags,
+    CorruptedStreamHeader,
     Io(std::io::Error),
 }
 
