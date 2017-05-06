@@ -3,6 +3,8 @@ extern crate std;
 #[derive(Debug)]
 pub enum Error {
     InvalidHeaderMagic,
+    UnsupportedHeaderVersion,
+    UnsupportedHeaderFlags,
     Io(std::io::Error),
 }
 
