@@ -41,10 +41,23 @@ impl<R> XzDecoder<R>
                 return Err(super::Error::CorruptedBlockHeader);
             }
         }
+
         let mut cursor = std::io::Cursor::new(buf);
         let mut block_flags = [0; 1];
         cursor.read_exact(&mut block_flags)?;
         let block_flags = super::BlockFlags::new(block_flags[0])?;
+
+        let compressed_size = if block_flags.compressed_size_field_is_present {
+            Some(read_multibyte_integer(&mut self.inner)?)
+        } else {
+            None
+        };
+
+        let uncompressed_size = if block_flags.uncompressed_size_field_is_present {
+            Some(read_multibyte_integer(&mut self.inner)?)
+        } else {
+            None
+        };
 
         let mut filters = Vec::new();
         for _ in 0..block_flags.number_of_filters {
@@ -54,6 +67,8 @@ impl<R> XzDecoder<R>
         Ok(super::BlockHeader {
                block_header_size,
                block_flags,
+               compressed_size,
+               uncompressed_size,
                filters,
            })
     }

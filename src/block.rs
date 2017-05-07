@@ -7,6 +7,8 @@ pub struct Block {
 pub struct BlockHeader {
     pub block_header_size: u16,
     pub block_flags: BlockFlags,
+    pub compressed_size: Option<u64>,
+    pub uncompressed_size: Option<u64>,
     pub filters: Vec<FilterFlags>,
 }
 
