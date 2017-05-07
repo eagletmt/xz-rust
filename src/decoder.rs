@@ -64,6 +64,13 @@ impl<R> XzDecoder<R>
             filters.push(read_filter_flags(&mut cursor)?);
         }
 
+        // Specification: v1.0.4 3.1.6
+        for padding in cursor.bytes() {
+            if padding? != 0 {
+                return Err(super::Error::InvalidBlockHeaderPadding);
+            }
+        }
+
         Ok(super::BlockHeader {
                block_header_size,
                block_flags,

@@ -8,6 +8,7 @@ pub enum Error {
     CorruptedStreamHeader,
     UnsupportedBlockFlags,
     CorruptedBlockHeader,
+    InvalidBlockHeaderPadding,
     Io(std::io::Error),
 }
 
