@@ -18,7 +18,7 @@ pub struct BlockFlags {
 
 impl BlockFlags {
     pub fn new(flags: u8) -> Result<Self, super::Error> {
-        let number_of_filters = flags & 0b00000011;
+        let number_of_filters = (flags & 0b00000011) + 1;
         let reserved = (flags & 0b00111100) >> 2;
         let compressed_size_field_is_present = ((flags & 0b01000000) >> 6) != 0;
         let uncompressed_size_field_is_present = ((flags & 0b10000000) >> 7) != 0;
