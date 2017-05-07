@@ -9,7 +9,7 @@ pub struct BlockHeader {
     pub block_flags: BlockFlags,
     pub compressed_size: Option<u64>,
     pub uncompressed_size: Option<u64>,
-    pub filters: Vec<FilterFlags>,
+    pub filters: Vec<super::FilterFlags>,
 }
 
 #[derive(Debug)]
@@ -35,10 +35,4 @@ impl BlockFlags {
                })
         }
     }
-}
-
-#[derive(Debug)]
-pub struct FilterFlags {
-    pub filter_id: u64,
-    pub properties: Vec<u8>,
 }

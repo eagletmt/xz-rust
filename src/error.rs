@@ -9,6 +9,8 @@ pub enum Error {
     UnsupportedBlockFlags,
     CorruptedBlockHeader,
     InvalidBlockHeaderPadding,
+    UnsupportedFilterId(u64),
+    InvalidFilterFlags(String),
     Io(std::io::Error),
 }
 

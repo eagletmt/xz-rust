@@ -120,17 +120,18 @@ fn read_u32le<R>(reader: &mut R) -> Result<u32, std::io::Error>
 }
 
 // Specification v1.0.4 3.1.5
-fn read_filter_flags<R>(mut reader: &mut R) -> Result<super::FilterFlags, std::io::Error>
+fn read_filter_flags<R>(mut reader: &mut R) -> Result<super::FilterFlags, super::Error>
     where R: std::io::Read
 {
     let filter_id = read_multibyte_integer(&mut reader)?;
     let size_of_properties = read_multibyte_integer(&mut reader)? as usize;
     let mut properties = vec![0; size_of_properties];
     reader.read_exact(&mut properties)?;
-    Ok(super::FilterFlags {
-           filter_id,
-           properties,
-       })
+
+    match filter_id {
+        0x21 => Ok(super::FilterFlags::Lzma2(super::Lzma2FilterFlags::new(&properties)?)),
+        _ => Err(super::Error::UnsupportedFilterId(filter_id)),
+    }
 }
 
 // Specification v1.0.4 1.2
