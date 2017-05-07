@@ -2,6 +2,7 @@ pub mod block;
 pub use block::Block;
 pub use block::BlockHeader;
 pub use block::BlockFlags;
+pub use block::FilterFlags;
 pub mod constants;
 pub mod decoder;
 pub use decoder::XzDecoder;

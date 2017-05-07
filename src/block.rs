@@ -7,6 +7,7 @@ pub struct Block {
 pub struct BlockHeader {
     pub block_header_size: u16,
     pub block_flags: BlockFlags,
+    pub filters: Vec<FilterFlags>,
 }
 
 #[derive(Debug)]
@@ -32,4 +33,10 @@ impl BlockFlags {
                })
         }
     }
+}
+
+#[derive(Debug)]
+pub struct FilterFlags {
+    pub filter_id: u64,
+    pub properties: Vec<u8>,
 }

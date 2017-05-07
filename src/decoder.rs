@@ -41,12 +41,20 @@ impl<R> XzDecoder<R>
                 return Err(super::Error::CorruptedBlockHeader);
             }
         }
+        let mut cursor = std::io::Cursor::new(buf);
+        let mut block_flags = [0; 1];
+        cursor.read_exact(&mut block_flags)?;
+        let block_flags = super::BlockFlags::new(block_flags[0])?;
 
-        let block_flags = super::BlockFlags::new(buf[0])?;
+        let mut filters = Vec::new();
+        for _ in 0..block_flags.number_of_filters {
+            filters.push(read_filter_flags(&mut cursor)?);
+        }
 
         Ok(super::BlockHeader {
                block_header_size,
                block_flags,
+               filters,
            })
     }
 }
@@ -87,4 +95,35 @@ fn read_u32le<R>(reader: &mut R) -> Result<u32, std::io::Error>
     let mut buf = [0; 4];
     reader.read_exact(&mut buf)?;
     Ok((buf[0] as u32) | ((buf[1] as u32) << 8) | ((buf[2] as u32) << 16) | ((buf[3] as u32) << 24))
+}
+
+// Specification v1.0.4 3.1.5
+fn read_filter_flags<R>(mut reader: &mut R) -> Result<super::FilterFlags, std::io::Error>
+    where R: std::io::Read
+{
+    let filter_id = read_multibyte_integer(&mut reader)?;
+    let size_of_properties = read_multibyte_integer(&mut reader)? as usize;
+    let mut properties = vec![0; size_of_properties];
+    reader.read_exact(&mut properties)?;
+    Ok(super::FilterFlags {
+           filter_id,
+           properties,
+       })
+}
+
+// Specification v1.0.4 1.2
+fn read_multibyte_integer<R>(reader: &mut R) -> Result<u64, std::io::Error>
+    where R: std::io::Read
+{
+    let mut buf = [0; 1];
+
+    reader.read_exact(&mut buf)?;
+    let mut num = (buf[0] & 0x7f) as u64;
+    let mut i = 0;
+    while (buf[0] & 0x80) != 0 {
+        reader.read_exact(&mut buf)?;
+        i += 1;
+        num |= ((buf[0] & 0x7f) as u64) << (i * 7);
+    }
+    Ok(num)
 }
